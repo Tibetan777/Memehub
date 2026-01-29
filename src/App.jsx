@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import Login from "./componants/login/Login";
-import Home from "./componants/home/Home";
+import Login from "./components/login/Login";
+import Home from "./components/home/Home";
 import './App.css';
 
 export default function App() {
