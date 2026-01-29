@@ -1,26 +1,57 @@
-/* --- Home.css (Fixed Visibility & Warnings) --- */
+/* กำหนดตัวแปรสีสำหรับ Light Mode (ค่าเริ่มต้น) */
+:root {
+  --bg-primary: #f0f2f5;
+  --bg-secondary: #ffffff;
+  --bg-input: #f1f3f4;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  --navbar-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  --accent-color: #3b82f6;
+  --hover-color: #2563eb;
+  --text-inverse: #ffffff;
+}
+
+/* กำหนดตัวแปรสีสำหรับ Dark Mode */
+body.dark-mode {
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --bg-input: #2c2c2c;
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --border-color: #333333;
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --navbar-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  --accent-color: #60a5fa;
+  --hover-color: #3b82f6;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s, color 0.3s;
+}
 
 .home-container {
   min-height: 100vh;
-  background-color: #f0f2f5;
   padding-top: 80px;
-  /* บังคับสีตัวอักษรหลักเป็นสีเข้ม (แก้ปัญหาตัวขาว) */
-  color: #1f2937;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-/* Navbar Style */
+/* Navbar */
 .navbar {
   position: fixed;
   top: 0;
-  left: 0;
   width: 100%;
-  background: white;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background-color: var(--bg-secondary);
+  box-shadow: var(--navbar-shadow);
   z-index: 1000;
   height: 70px;
   display: flex;
   align-items: center;
+  transition: background-color 0.3s;
 }
 
 .navbar-content {
@@ -33,26 +64,24 @@
 }
 
 .navbar-logo {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 800;
-  color: #333;
-  /* Fallback color */
-  background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin: 0;
   cursor: pointer;
+  background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-/* Search Bar */
 .search-bar {
   display: flex;
-  background: #f1f3f4;
+  background-color: var(--bg-input);
   border-radius: 8px;
-  padding: 5px 15px;
-  width: 40%;
+  padding: 0 15px;
+  width: 35%;
+  height: 40px;
   align-items: center;
+  border: 1px solid transparent;
 }
 
 .search-bar input {
@@ -60,20 +89,8 @@
   background: transparent;
   outline: none;
   width: 100%;
-  padding: 8px;
-  font-size: 1rem;
-  /* บังคับสี Input ให้เข้ม */
-  color: #1f2937;
-}
-
-.search-bar button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 0.95rem;
+  color: var(--text-primary);
 }
 
 .navbar-menu {
@@ -82,87 +99,98 @@
   gap: 15px;
 }
 
-.user-name {
-  font-weight: 600;
-  color: #374151;
+.theme-toggle-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 8px;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: all 0.2s;
 }
 
-/* Buttons */
+.theme-toggle-btn:hover {
+  background-color: var(--bg-input);
+}
+
 .upload-btn-nav {
-  background: #2ecc71;
-  color: white;
+  background-color: var(--accent-color);
+  color: var(--text-inverse);
   border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.2s;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
 .upload-btn-nav:hover {
-  background: #27ae60;
+  background-color: var(--hover-color);
 }
 
 .logout-btn {
-  background: #e74c3c;
-  color: white;
-  border: none;
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
   padding: 8px 16px;
-  border-radius: 20px;
-  cursor: pointer;
+  border-radius: 6px;
   font-weight: 500;
+  font-size: 0.9rem;
 }
 
-/* Grid Layout */
+.logout-btn:hover {
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+}
+
+/* Grid & Cards */
 .memes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
 }
 
 .meme-card {
-  background: white;
+  background-color: var(--bg-secondary);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--card-shadow);
   transition: transform 0.2s;
-  display: flex;
-  flex-direction: column;
+  border: 1px solid var(--border-color);
 }
 
 .meme-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-4px);
 }
 
 .meme-image-wrapper {
-  height: 250px;
-  background: #f3f4f6;
+  height: 280px;
+  background-color: var(--bg-input);
   cursor: pointer;
   overflow: hidden;
-  position: relative;
 }
 
 .meme-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
 }
 
 .meme-info {
-  padding: 15px;
-  /* บังคับสีข้อความใน Card */
-  color: #1f2937;
+  padding: 16px;
 }
 
 .meme-info h3 {
   margin: 0 0 10px;
-  font-size: 1.1rem;
-  color: #111827;
-  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -171,181 +199,131 @@
 .meme-actions {
   display: flex;
   justify-content: space-between;
-  color: #6b7280;
-  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
 /* Load More */
 .load-more-btn {
   display: block;
-  margin: 30px auto;
+  margin: 40px auto;
   padding: 12px 30px;
-  background: #1f2937;
-  color: white;
-  border: none;
-  border-radius: 25px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 500;
-  transition: background 0.2s;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-weight: 600;
 }
 
 .load-more-btn:hover {
-  background: #374151;
+  background-color: var(--bg-input);
 }
 
-.loading-text {
-  text-align: center;
-  padding: 20px;
-  color: #6b7280;
-}
-
-/* Modal Styling */
+/* Modal */
 .modal-overlay {
+  background-color: rgba(0, 0, 0, 0.85);
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.75);
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   z-index: 2000;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(5px);
 }
 
 .modal-content {
-  background: white;
-  padding: 0;
-  border-radius: 16px;
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
   max-width: 900px;
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  /* บังคับสีข้อความใน Modal */
-  color: #1f2937;
+  color: var(--text-primary);
 }
 
 .upload-modal {
-  max-width: 500px;
-  padding: 24px;
+  max-width: 480px;
+  padding: 30px;
 }
 
 .upload-modal h2 {
   margin-top: 0;
-  margin-bottom: 20px;
-  color: #111827;
+  margin-bottom: 24px;
+  font-size: 1.5rem;
 }
 
 .modal-close {
   position: absolute;
-  top: 16px;
+  top: 15px;
   right: 20px;
-  background: transparent;
+  background: none;
   border: none;
-  font-size: 2rem;
-  line-height: 1;
+  font-size: 24px;
+  color: var(--text-secondary);
   cursor: pointer;
-  color: #9ca3af;
   z-index: 10;
-  padding: 0;
-}
-
-.modal-close:hover {
-  color: #4b5563;
-}
-
-/* Upload Form Styles */
-.form-group {
-  margin-bottom: 16px;
 }
 
 .form-group label {
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
+  font-size: 0.9rem;
 }
 
-/* บังคับสี Input/Select ในฟอร์ม */
 .form-group input,
-.form-group select,
-.form-group textarea {
+.form-group select {
   width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 1rem;
-  color: #1f2937;
-  background-color: #ffffff;
+  padding: 10px;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 6px;
   box-sizing: border-box;
-  /* สำคัญ: ป้องกัน input ล้น */
-}
-
-.form-group input:focus,
-.form-group select:focus {
-  outline: 2px solid #3b82f6;
-  border-color: transparent;
 }
 
 .upload-area {
-  border: 2px dashed #d1d5db;
-  border-radius: 12px;
+  background-color: var(--bg-input);
+  border: 2px dashed var(--border-color);
+  border-radius: 8px;
   min-height: 200px;
   display: flex;
-  justify-content: center;
   align-items: center;
-  margin-bottom: 24px;
+  justify-content: center;
   cursor: pointer;
-  background: #f9fafb;
-  transition: border-color 0.2s;
-  overflow: hidden;
-}
-
-.upload-area:hover {
-  border-color: #9ca3af;
+  margin-bottom: 24px;
 }
 
 .upload-placeholder {
+  color: var(--text-secondary);
   width: 100%;
   height: 100%;
   display: flex;
-  justify-content: center;
   align-items: center;
-  color: #6b7280;
-  min-height: 200px;
+  justify-content: center;
 }
 
 .upload-preview {
   max-width: 100%;
   max-height: 300px;
-  border-radius: 8px;
-  object-fit: contain;
+  border-radius: 4px;
 }
 
 .submit-btn {
   width: 100%;
   padding: 12px;
-  background: #3b82f6;
-  color: white;
+  background-color: var(--accent-color);
+  color: var(--text-inverse);
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: 6px;
   font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.submit-btn:hover {
-  background: #2563eb;
-}
-
-.submit-btn:disabled {
-  background: #93c5fd;
-  cursor: not-allowed;
+  font-size: 1rem;
 }
 
 /* View Modal */
@@ -355,50 +333,49 @@
 }
 
 .modal-img-container {
-  flex: 2;
-  background: #000;
+  flex: 1.5;
+  background-color: #000;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   min-height: 400px;
-  min-width: 300px;
 }
 
 .modal-img-container img {
   max-width: 100%;
   max-height: 80vh;
-  object-fit: contain;
 }
 
 .modal-details {
   flex: 1;
-  padding: 24px;
-  min-width: 300px;
+  padding: 30px;
+  min-width: 320px;
   display: flex;
   flex-direction: column;
 }
 
 .modal-details h2 {
   margin-top: 0;
-  color: #111827;
+  font-size: 1.4rem;
+  line-height: 1.4;
 }
 
 .meta {
-  color: #6b7280;
-  font-size: 0.95rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
   margin-bottom: 20px;
 }
 
 .stats {
-  margin-bottom: 20px;
   font-weight: 600;
-  color: #1f2937;
+  margin-bottom: 24px;
+  font-size: 1.1rem;
 }
 
 .action-buttons {
-  display: flex;
-  gap: 12px;
   margin-top: auto;
+  display: flex;
+  gap: 10px;
 }
 
 .action-buttons button {
@@ -406,37 +383,26 @@
   padding: 10px;
   border: none;
   border-radius: 6px;
-  cursor: pointer;
   color: white;
-  font-weight: 500;
-  transition: opacity 0.2s;
-}
-
-.action-buttons button:hover {
-  opacity: 0.9;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .like-btn {
-  background: #ec4899;
+  background-color: #ec4899;
 }
 
 .dl-btn {
-  background: #3b82f6;
+  background-color: #3b82f6;
 }
 
 .del-btn {
-  background: #ef4444;
+  background-color: #ef4444;
 }
 
-/* Media Queries for Mobile */
 @media (max-width: 768px) {
   .search-bar {
     display: none;
-    /* ซ่อน Search บนมือถือถ้าที่เต็ม */
-  }
-
-  .navbar-content {
-    width: 95%;
   }
 
   .modal-body {
