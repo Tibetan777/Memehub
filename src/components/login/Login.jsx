@@ -30,6 +30,14 @@ export default function Login({ onLoginSuccess }) {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error');
+      if (isRegister) {
+        alert('Register Successful! Please Login.');
+        setIsRegister(false);
+        setName('');
+        setPassword('');
+        setLoading(false);
+        return;
+      }
 
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
@@ -111,4 +119,3 @@ export default function Login({ onLoginSuccess }) {
     </div>
   );
 }
-

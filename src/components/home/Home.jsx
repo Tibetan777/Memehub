@@ -19,7 +19,6 @@ export default function Home({ user, onLogout }) {
     checkAdminStatus();
   }, []);
 
-  // Check if logged-in user is admin
   const checkAdminStatus = async () => {
     const token = localStorage.getItem('token');
     if (!token) return;
@@ -32,7 +31,6 @@ export default function Home({ user, onLogout }) {
         setIsAdmin(profile.role === 'admin');
       }
     } catch (err) {
-      // Admin check failed silently
     }
   };
 
@@ -60,7 +58,6 @@ export default function Home({ user, onLogout }) {
 
     setUploading(true);
     const reader = new FileReader();
-    
     reader.onload = async (event) => {
       try {
         const base64Data = event.target.result;
@@ -103,7 +100,7 @@ export default function Home({ user, onLogout }) {
     reader.readAsDataURL(file);
   };
 
-  // Like a meme (one per user) - update state without refresh
+  // Like a meme
   const handleLike = async (memeId) => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -118,7 +115,6 @@ export default function Home({ user, onLogout }) {
       });
 
       if (res.ok) {
-        // Update state instantly without page refresh
         setMemes(memes.map(m => m.id === memeId ? { ...m, likes: m.likes + 1 } : m));
         if (selectedMeme && selectedMeme.id === memeId) {
           setSelectedMeme({ ...selectedMeme, likes: selectedMeme.likes + 1 });
@@ -132,7 +128,7 @@ export default function Home({ user, onLogout }) {
     }
   };
 
-  // Delete meme (admin only)
+  // Delete meme
   const handleDeleteMeme = async (memeId) => {
     if (!window.confirm('Delete this meme?')) return;
 
@@ -231,11 +227,13 @@ export default function Home({ user, onLogout }) {
               {memes.map(meme => (
                 <div key={meme.id} className="meme-card">
                   <div className="meme-image-wrapper" onClick={() => setSelectedMeme(meme)}>
+                    {/* --- จุดที่แก้ 1: ใส่ URL เต็มๆ --- */}
                     <img
-                      src={`${API}/memes/${meme.id}/image`}
+                      src={`http://localhost:3000/api/memes/${meme.id}/image`}
                       alt={meme.title}
                       className="meme-image"
-                      onError={(e) => e.target.src = 'data:image/svg+xml,%3Csvg%3E%3C/svg%3E'}
+                      loading="lazy"
+                      onError={(e) => e.target.src = 'https://via.placeholder.com/300?text=Error'}
                     />
                   </div>
                   <div className="meme-info">
@@ -263,8 +261,9 @@ export default function Home({ user, onLogout }) {
         <div className="modal-overlay" onClick={() => setSelectedMeme(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setSelectedMeme(null)}>×</button>
+            {/* --- จุดที่แก้ 2: ใส่ URL เต็มๆ --- */}
             <img
-              src={`${API}/memes/${selectedMeme.id}/image`}
+              src={`http://localhost:3000/api/memes/${selectedMeme.id}/image`}
               alt={selectedMeme.title}
               className="modal-image"
             />
