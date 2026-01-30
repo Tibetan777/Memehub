@@ -2,6 +2,22 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import "./Home.css";
 
 // --- Icons ---
+const SearchIcon = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{ minWidth: "20px" }}
+  >
+    <circle cx="11" cy="11" r="8"></circle>
+    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+  </svg>
+);
 const HeartIcon = ({ filled }) => (
   <svg
     width="20"
@@ -64,8 +80,8 @@ const EditIcon = () => (
 );
 const SettingsIcon = () => (
   <svg
-    width="20"
-    height="20"
+    width="18"
+    height="18"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -80,11 +96,10 @@ const SettingsIcon = () => (
 
 export default function Home({ user, onLogout }) {
   const [memes, setMemes] = useState([]);
-  const [categories, setCategories] = useState([]); // 🔥 Load from DB
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  // Upload State
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -92,16 +107,13 @@ export default function Home({ user, onLogout }) {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [category, setCategory] = useState("");
 
-  // Search & Filter State
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("All");
 
-  // View & Edit State
   const [selectedMeme, setSelectedMeme] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editCategory, setEditCategory] = useState("");
 
-  // Admin Category Management
   const [showCatManager, setShowCatManager] = useState(false);
   const [newCatName, setNewCatName] = useState("");
 
@@ -163,7 +175,6 @@ export default function Home({ user, onLogout }) {
       setLoading(true);
       const token = localStorage.getItem("token");
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
       const query = `page=${pageNum}&limit=12&search=${encodeURIComponent(search)}&category=${cat}&t=${Date.now()}`;
       const res = await fetch(`${API}/memes?${query}`, { headers });
       const responseData = await res.json();
@@ -243,7 +254,6 @@ export default function Home({ user, onLogout }) {
     reader.readAsDataURL(file);
   };
 
-  // 🔥 Admin: Add Category
   const handleAddCategory = async (e) => {
     e.preventDefault();
     if (!newCatName) return;
@@ -258,7 +268,7 @@ export default function Home({ user, onLogout }) {
       });
       if (res.ok) {
         setNewCatName("");
-        fetchCategories(); // Reload list
+        fetchCategories();
       } else {
         alert("Category likely exists");
       }
@@ -267,7 +277,6 @@ export default function Home({ user, onLogout }) {
     }
   };
 
-  // 🔥 Admin: Delete Category
   const handleDeleteCategory = async (catName) => {
     if (!window.confirm(`Delete category "${catName}"?`)) return;
     try {
@@ -398,8 +407,16 @@ export default function Home({ user, onLogout }) {
               MemeHub
             </h1>
 
-            <div className="search-container">
-              <form className="search-bar" onSubmit={handleSearch}>
+            {/* Unified Search Bar */}
+            <div className="search-bar-unified">
+              <div className="search-icon-box">
+                <SearchIcon />
+              </div>
+
+              <form
+                onSubmit={handleSearch}
+                style={{ flex: 1, display: "flex" }}
+              >
                 <input
                   type="text"
                   placeholder="Search..."
@@ -407,27 +424,33 @@ export default function Home({ user, onLogout }) {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </form>
+
+              <div className="search-divider"></div>
+
               <select
-                className="nav-cat-select"
+                className="cat-select-unified"
                 value={filterCategory}
                 onChange={handleCategoryFilterChange}
               >
-                <option value="All">All Categories</option>
+                <option value="All">All</option>
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat}
                   </option>
                 ))}
               </select>
-              {/* ปุ่ม Admin Manage Categories */}
+
               {user?.role === "admin" && (
-                <button
-                  className="settings-btn"
-                  onClick={() => setShowCatManager(true)}
-                  title="Manage Categories"
-                >
-                  <SettingsIcon />
-                </button>
+                <>
+                  <div className="search-divider"></div>
+                  <button
+                    className="settings-icon-btn"
+                    onClick={() => setShowCatManager(true)}
+                    title="Manage Categories"
+                  >
+                    <SettingsIcon />
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -436,19 +459,21 @@ export default function Home({ user, onLogout }) {
               {darkMode ? "☀️" : "🌙"}
             </button>
             <span className="user-name">{user?.name}</span>
+            {/* เปลี่ยนข้อความปุ่มตรงนี้ */}
             <button
               className="upload-btn-nav"
               onClick={() => setShowUploadModal(true)}
             >
-              + New
+              Upload
             </button>
             <button className="logout-btn" onClick={onLogout}>
-              Exit
+              Log Out
             </button>
           </div>
         </div>
       </nav>
 
+      {/* Content */}
       <div className="home-content">
         <div className="memes-header">
           <h2>
@@ -492,14 +517,12 @@ export default function Home({ user, onLogout }) {
             );
           })}
         </div>
-
         {loading && <div className="loading-spinner">Loading...</div>}
         {!hasMore && memes.length > 0 && (
           <div className="end-text">You've reached the end!</div>
         )}
       </div>
 
-      {/* Upload Modal */}
       {showUploadModal && (
         <div
           className="modal-overlay"
@@ -576,7 +599,6 @@ export default function Home({ user, onLogout }) {
         </div>
       )}
 
-      {/* 🔥 Admin Category Manager Modal */}
       {showCatManager && (
         <div className="modal-overlay" onClick={() => setShowCatManager(false)}>
           <div
@@ -639,7 +661,6 @@ export default function Home({ user, onLogout }) {
         </div>
       )}
 
-      {/* View/Edit Modal */}
       {selectedMeme && (
         <div className="modal-overlay" onClick={() => setSelectedMeme(null)}>
           <div
