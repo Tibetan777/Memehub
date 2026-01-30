@@ -30,29 +30,29 @@ body.dark-mode {
   min-height: 100vh;
   background-color: var(--bg-main);
   color: var(--text-primary);
-  padding-top: 80px; /* Desktop padding */
+  padding-top: 120px; /* เผื่อที่ให้ Navbar */
   font-family: "Inter", system-ui, sans-serif;
 }
 
 /* Navbar */
 .navbar {
   position: fixed;
-  top: 0;
+  top: 0%;
   width: 100%;
   background: var(--bg-card);
   border-bottom: 1px solid var(--border);
   z-index: 100;
-  padding: 10px 0;
-  height: 64px; /* Fixed height for desktop */
+  padding: 0% fit-content;
+  height: fit-content;
   display: flex;
   align-items: center;
 }
 
 .navbar-content {
-  width: 95%;
-  max-width: 1280px;
-  margin: 0 auto;
-  display: flex;
+  width: 100%;
+  max-width: fit-content;
+  margin: fit-content auto;
+  display: fit-content flex;
   justify-content: space-between;
   align-items: center;
   gap: 20px;
@@ -83,15 +83,15 @@ body.dark-mode {
   background: var(--bg-input);
   border: 1px solid var(--border);
   border-radius: 99px;
-  padding: 4px 8px; /* Compact padding */
+  padding: 4px 8px;
   width: 100%;
-  max-width: 600px; /* Limit width on desktop */
+  max-width: 600px;
   height: 44px;
   transition: box-shadow 0.2s;
 }
 
 .search-bar-unified:focus-within {
-  box-shadow: 0 0 0 2px var(--accent); /* Focus ring */
+  box-shadow: 0 0 0 2px var(--accent);
   border-color: transparent;
 }
 
@@ -119,6 +119,12 @@ body.dark-mode {
   margin: 0 4px;
 }
 
+/* Fix Dark Mode Option Colors */
+body.dark-mode .cat-select-unified option {
+  background-color: #1e293b;
+  color: #f8fafc;
+}
+
 .cat-select-unified {
   border: none;
   background: transparent;
@@ -127,7 +133,7 @@ body.dark-mode {
   font-size: 0.9rem;
   padding: 0 8px;
   cursor: pointer;
-  max-width: 120px; /* Prevent long category names from eating space */
+  max-width: 120px;
   text-overflow: ellipsis;
 }
 
@@ -141,6 +147,7 @@ body.dark-mode {
   cursor: pointer;
   transition: color 0.2s;
 }
+
 .settings-icon-btn:hover {
   color: var(--accent);
 }
@@ -166,6 +173,7 @@ button {
   border-radius: 99px;
   white-space: nowrap;
 }
+
 .upload-btn-nav:hover {
   background: var(--accent-hover);
   transform: translateY(-1px);
@@ -175,6 +183,7 @@ button {
   background: transparent;
   color: var(--text-secondary);
 }
+
 .logout-btn:hover {
   color: var(--text-primary);
 }
@@ -192,6 +201,7 @@ button {
   color: var(--text-primary);
   margin-bottom: 24px;
 }
+
 .memes-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -210,6 +220,7 @@ button {
   display: flex;
   flex-direction: column;
 }
+
 .meme-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
@@ -223,6 +234,7 @@ button {
   justify-content: center;
   overflow: hidden;
 }
+
 .meme-image {
   width: 100%;
   height: 100%;
@@ -236,6 +248,7 @@ button {
   flex-direction: column;
   gap: 6px;
 }
+
 .meme-title {
   margin: 0;
   font-size: 1.05rem;
@@ -245,6 +258,7 @@ button {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .meme-meta-row {
   display: flex;
   justify-content: space-between;
@@ -252,6 +266,7 @@ button {
   font-size: 0.85rem;
   color: var(--text-secondary);
 }
+
 .meme-cat-badge {
   background: var(--bg-main);
   padding: 2px 8px;
@@ -259,6 +274,7 @@ button {
   border: 1px solid var(--border);
   font-size: 0.75rem;
 }
+
 .meme-stats-row {
   display: flex;
   align-items: center;
@@ -269,7 +285,7 @@ button {
   padding-top: 8px;
 }
 
-/* --- MODAL STYLES (Desktop Default) --- */
+/* Modal Styles */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -291,17 +307,18 @@ button {
   position: relative;
 }
 
-/* View Modal Desktop */
 .view-modal {
   width: 95%;
   max-width: 1000px;
   max-height: 90vh;
 }
+
 .view-modal .modal-body {
   display: flex;
   height: 85vh;
   overflow: hidden;
 }
+
 .modal-img-container {
   flex: 1.8;
   background: #000;
@@ -310,11 +327,13 @@ button {
   justify-content: center;
   overflow: hidden;
 }
+
 .modal-img-container img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
 }
+
 .modal-details {
   flex: 1;
   padding: 32px;
@@ -325,12 +344,12 @@ button {
   overflow-y: auto;
 }
 
-/* Upload Modal Desktop */
 .upload-modal {
   width: 100%;
   max-width: 500px;
   max-height: 85vh;
 }
+
 .modal-scroll-area {
   padding: 20px;
   overflow-y: auto;
@@ -349,6 +368,7 @@ button {
   line-height: 1;
   border: none;
 }
+
 .modal-header-section {
   padding: 20px;
   border-bottom: 1px solid var(--border);
@@ -356,22 +376,24 @@ button {
   justify-content: space-between;
   align-items: center;
 }
+
 .modal-header-section h2 {
   margin: 0;
   font-size: 1.2rem;
   color: var(--text-primary);
 }
 
-/* Form Elements */
 .form-group {
   margin-bottom: 16px;
 }
+
 .form-group label {
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
   color: var(--text-primary);
 }
+
 .form-group input,
 .form-group select {
   width: 100%;
@@ -383,6 +405,7 @@ button {
   box-sizing: border-box;
   font-size: 1rem;
 }
+
 .upload-area {
   border: 2px dashed var(--border);
   background: var(--bg-input);
@@ -396,11 +419,13 @@ button {
   color: var(--text-secondary);
   overflow: hidden;
 }
+
 .upload-preview {
   max-width: 100%;
   max-height: 300px;
   object-fit: contain;
 }
+
 .submit-btn {
   width: 100%;
   padding: 12px;
@@ -411,7 +436,6 @@ button {
   margin-top: 10px;
 }
 
-/* Modal Info */
 .modal-title {
   margin: 0 0 12px 0;
   font-size: 1.6rem;
@@ -419,6 +443,7 @@ button {
   color: var(--text-primary);
   font-weight: 800;
 }
+
 .modal-meta-block {
   display: flex;
   flex-direction: column;
@@ -426,11 +451,13 @@ button {
   margin-bottom: 24px;
   color: var(--text-secondary);
 }
+
 .modal-category-row {
   display: flex;
   align-items: center;
   gap: 10px;
 }
+
 .modal-cat-badge {
   background: var(--bg-main);
   padding: 4px 12px;
@@ -439,6 +466,7 @@ button {
   border: 1px solid var(--border);
   color: var(--text-primary);
 }
+
 .edit-icon-btn {
   background: transparent;
   color: var(--text-secondary);
@@ -446,11 +474,13 @@ button {
   border-radius: 4px;
   display: flex;
 }
+
 .edit-cat-wrapper {
   display: flex;
   gap: 8px;
   align-items: center;
 }
+
 .edit-cat-select {
   padding: 4px;
   border-radius: 4px;
@@ -458,6 +488,7 @@ button {
   color: var(--text-primary);
   border: 1px solid var(--border);
 }
+
 .save-tiny-btn {
   background: var(--accent);
   color: white;
@@ -465,6 +496,7 @@ button {
   font-size: 0.8rem;
   border-radius: 4px;
 }
+
 .cancel-tiny-btn {
   background: transparent;
   color: var(--text-secondary);
@@ -472,46 +504,53 @@ button {
   font-size: 0.8rem;
 }
 
-/* Action Area */
 .modal-actions-area {
   margin-top: auto;
 }
+
 .stats-large {
   font-size: 1.2rem;
   font-weight: 700;
   margin-bottom: 16px;
   color: var(--text-primary);
 }
+
 .action-row {
   display: flex;
   gap: 12px;
 }
+
+/* Fix .action-btn Selector */
 .action-btn {
-  flex: 1;
+  position: relative;
+  overflow: hidden;
+  touch-action: manipulation; /* ปิด Double Tap Zoom เพื่อให้กดติดทันที */
+  cursor: pointer;
+  z-index: 50; /* มั่นใจว่าอยู่เหนือ Layer อื่น */
+  pointer-events: auto !important; /* บังคับให้รับแรงกด */
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 1rem;
-  border: 1px solid var(--border);
-  background: var(--bg-main);
-  color: var(--text-primary);
+  min-height: 44px; /* ขนาดขั้นต่ำที่นิ้วคนกดง่าย */
 }
+
 .action-btn.like.active {
   background: #fee2e2;
   color: #ef4444;
   border-color: #fda4af;
 }
+
 body.dark-mode .action-btn.like.active {
   background: #4c0519;
   border-color: #881337;
 }
+
 .action-btn.download {
   background: var(--text-primary);
   color: var(--bg-card);
 }
+
 .action-btn.delete {
   color: var(--danger);
   border-color: var(--danger);
@@ -519,154 +558,117 @@ body.dark-mode .action-btn.like.active {
 }
 
 /* =========================================
-  MOBILE RESPONSIVE (ปรับปรุงใหม่)
+  MOBILE RESPONSIVE
    ========================================= */
 @media (max-width: 768px) {
-  .home-container {
-    padding-top: 140px; /* เผื่อพื้นที่ให้ Navbar 2 บรรทัด */
+  /* บังคับให้แผงปุ่มลอยเหนือทุกอย่างเพื่อรับแรงกด */
+  .modal-actions-area {
+    position: relative !important;
+    z-index: 9999 !important;
+    pointer-events: auto !important;
   }
 
-  /* Navbar: จัดเรียงใหม่เป็น 2 บรรทัด */
-  .navbar {
-    height: auto;
-    padding: 10px 0;
+  /* ป้องกันรูปภาพขยายมาทับพื้นที่ปุ่ม */
+  .modal-img-container {
+    pointer-events: none !important; /* ให้คลิกทะลุรูปไปหาปุ่มด้านล่างได้ */
   }
+
+  /* เจาะจงให้ปุ่มกดรับคำสั่งได้ 100% */
+  .action-btn, .save-tiny-btn {
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+  }
+  /* 1. จัด Navbar ไม่ให้ล้นและเลื่อนได้ (Slider) */
   .navbar-content {
     flex-direction: column;
-    gap: 12px;
+    padding: 10px;
+    gap: 10px;
   }
 
-  /* บรรทัดที่ 1: Logo + ปุ่ม Menu */
   .nav-left {
     width: 100%;
-    justify-content: space-between; /* ดัน Logo ซ้าย Menu ขวา */
-    flex: none;
+    justify-content: space-between;
+    flex-wrap: nowrap;
   }
 
-  .navbar-logo {
-    display: block !important; /* บังคับโชว์ Logo */
-    font-size: 1.4rem;
-  }
-
-  .navbar-menu {
-    gap: 8px;
-  }
-  .user-name {
-    display: none;
-  } /* ซ่อนชื่อเพื่อประหยัดที่ */
-
-  /* บรรทัดที่ 2: Search Unified Bar */
   .search-bar-unified {
-    order: 2; /* ย้ายมาล่างสุด */
-    width: 100%; /* เต็มความกว้าง */
-    max-width: 100%;
-    margin-top: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 40px !important;
+    overflow-x: auto; /* กลับมาสไลด์ได้เหมือนเดิม */
+    overflow-y: hidden;
+    white-space: nowrap;
+    padding: 2px 10px !important;
+    display: flex;
+    align-items: center;
+    -webkit-overflow-scrolling: touch; /* ให้สไลด์ลื่นๆ ใน iOS */
   }
 
-  /* ====================
-    VIEW IMAGE MODAL (Mobile)
-     ==================== */
+  /* กัน Navbar เมนู (ปุ่ม Logout) ล้น */
+  .navbar-menu {
+    width: 100%;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  /* 2. ปรับโครงสร้าง Modal ให้กดปุ่มติด 100% */
   .view-modal {
     width: 100% !important;
     height: 100% !important;
     max-height: 100% !important;
-    max-width: 100% !important;
     border-radius: 0;
-    display: flex;
-    flex-direction: column;
   }
 
   .view-modal .modal-body {
     flex-direction: column;
-    height: 100%; /* เต็มจอ */
-    overflow: hidden;
-  }
-
-  .modal-close {
-    top: 10px;
-    right: 10px;
-    background: rgba(0, 0, 0, 0.5); /* พื้นหลังดำจางๆ ให้เห็นชัดบนรูป */
-    color: white;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    z-index: 20;
+    height: 100vh;
+    overflow-y: auto !important; /* บังคับเลื่อนที่ตัว Body */
+    background: var(--bg-card);
   }
 
   .modal-img-container {
-    flex: 1; /* กินพื้นที่ส่วนใหญ่ */
-    min-height: 40vh; /* อย่างน้อย 40% ของจอ */
-    background: #000;
+    flex: 0 0 auto;
+    height: 50vh; /* รูปกินพื้นที่ครึ่งจอ */
+    z-index: 1;
   }
 
   .modal-details {
-    flex: 0 0 auto; /* ไม่ยืดหดตามใจชอบ */
-    max-height: 50vh; /* สูงสุดครึ่งจอ */
-    overflow-y: auto; /* ให้ scroll เฉพาะรายละเอียด */
-    padding: 16px;
-    border-top: 1px solid var(--border);
-    border-left: none;
-    padding-bottom: 80px; /* เผื่อที่ให้ปุ่ม Action ลอยตัว */
+    flex: 1 0 auto;
+    padding: 20px 16px 120px 16px !important;
+    z-index: 5;
+    position: relative;
   }
 
-  .modal-title {
-    font-size: 1.2rem;
-    margin-bottom: 8px;
-  }
-
-  /* Action Buttons ลอยตัวติดขอบล่าง */
+  /* เปลี่ยนจาก Fixed เป็น Sticky เพื่อให้ปุ่มรับ Click Event ได้ปกติ */
   .modal-actions-area {
-    position: fixed;
+    position: sticky;
     bottom: 0;
     left: 0;
     width: 100%;
-    background: var(--modal-bg);
-    padding: 12px 16px;
+    background: var(--bg-card);
+    padding: 16px 20px 25px 20px;
     border-top: 1px solid var(--border);
-    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
-    z-index: 15;
+    box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.1);
+    z-index: 9999 !important;
     box-sizing: border-box;
   }
 
-  .stats-large {
-    margin-bottom: 8px;
-    font-size: 1rem;
+  .action-row {
+    display: flex;
+    gap: 10px;
   }
+
   .action-btn {
-    padding: 10px;
-    font-size: 0.9rem;
+    flex: 1;
+    min-height: 48px;
+    font-size: 0.95rem;
+    pointer-events: auto !important;
   }
+}
 
-  /* ====================
-    UPLOAD MODAL (Mobile)
-     ==================== */
-  .upload-modal {
-    width: 100% !important;
-    height: 100% !important;
-    max-height: 100% !important;
-    border-radius: 0;
-  }
-
-  .modal-scroll-area {
-    padding-bottom: 80px; /* กันปุ่มบังเนื้อหา */
-  }
-
-  /* จำกัดความสูงรูป Preview ในมือถือ */
-  .upload-preview {
-    max-height: 200px;
-  }
-
-  /* ปุ่ม Post ใหญ่ๆ ด้านล่าง */
-  .submit-btn {
-    position: fixed;
-    bottom: 16px;
-    left: 5%;
-    width: 90%;
-    z-index: 20;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  }
+/* เพิ่มเติมนอก Media Query เพื่อความลื่นไหล */
+.action-btn, .save-tiny-btn, .navbar-logo {
+  cursor: pointer;
+  touch-action: manipulation; /* บังคับให้ Browser มือถือส่ง Click ทันทีไม่ต้องรอ 300ms */
+  -webkit-tap-highlight-color: transparent;
 }

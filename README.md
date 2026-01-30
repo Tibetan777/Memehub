@@ -1,16 +1,110 @@
-# React + Vite
+# 🚀 MemeHub Project Setup Guide
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+คู่มือการติดตั้งและใช้งานระบบ **MemeHub** (Meme Archiving & Community Platform)
+สำหรับ Developer และ Admin เพื่อรันบน Server หรือ Localhost
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 📋 1. สิ่งที่ต้องมี (Prerequisites)
 
-## React Compiler
+ก่อนเริ่มติดตั้ง ต้องมั่นใจว่าเครื่องมีโปรแกรมเหล่านี้:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+* **Node.js** (แนะนำเวอร์ชัน 18 ขึ้นไป) -> [ดาวน์โหลด](https://nodejs.org/)
+* **MySQL Server** (หรือ XAMPP) -> [ดาวน์โหลด](https://www.apachefriends.org/)
+* **Git** -> [ดาวน์โหลด](https://git-scm.com/)
+* **Redis** ติดตั้ง Redis Server ลงใน Windows (เพราะไลบรารี redis ในโค้ดมันเป็นแค่ตัวเชื่อมต่อ ไม่ใช่ตัวโปรแกรมหลัก) -> [ดาวน์โหลด](https://www.memurai.com/get-memurai)
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🗄️ 2. การเตรียมฐานข้อมูล (Database Setup)
+
+1. เปิดโปรแกรมจัดการ Database (เช่น phpMyAdmin, MySQL Workbench หรือ HeidiSQL)
+2. สร้าง Database ชื่อ: **`James_Example`** (หรือชื่อที่คุณต้องการ แต่ต้องแก้ใน `.env` ให้ตรงกัน)
+3. รันคำสั่ง SQL ด้านล่างนี้เพื่อสร้างตารางทั้งหมด:
+
+```sql
+-- 1. ตารางสมาชิก
+CREATE TABLE members (
+    id_mem INT AUTO_INCREMENT PRIMARY KEY,
+    name_mem VARCHAR(100) NOT NULL,
+    email_mem VARCHAR(100) UNIQUE NOT NULL,
+    password_mem VARCHAR(255), -- เก็บเผื่อไว้ (Legacy)
+    password_encrypted VARCHAR(255) NOT NULL,
+    role ENUM('user', 'admin') DEFAULT 'user',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. ตารางหมวดหมู่ (สำหรับระบบ Dynamic Category)
+CREATE TABLE categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL
+);
+-- เพิ่มหมวดหมู่เริ่มต้น
+INSERT INTO categories (name) VALUES
+('Funny'), ('Relatable'), ('Dark Humor'), ('Anime'), ('Work Life'), ('Other'), ('General');
+
+-- 3. ตารางมีม
+CREATE TABLE memes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    image VARCHAR(255) NOT NULL,
+    category VARCHAR(50) DEFAULT 'General',
+    description TEXT,
+    likes INT DEFAULT 0,
+    created_by INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES members(id_mem) ON DELETE CASCADE
+);
+
+-- 4. ตารางกดไลค์
+CREATE TABLE meme_likes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    meme_id INT NOT NULL,
+    user_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (meme_id) REFERENCES memes(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES members(id_mem) ON DELETE CASCADE
+);
+⚙️ 3. การติดตั้งและตั้งค่าโปรเจกต์ (Installation)
+Clone Project & Install Dependencies: เปิด Terminal (CMD หรือ PowerShell) ในโฟลเดอร์โปรเจกต์ แล้วพิมพ์:
+
+Bash
+npm install
+ตั้งค่าความลับ (.env): สร้างไฟล์ชื่อ .env ไว้ที่โฟลเดอร์นอกสุด (ระดับเดียวกับ package.json) แล้วใส่ข้อมูลตามนี้:
+
+ข้อมูลโค้ด
+JWT_SECRET=ตั้งรหัสลับอะไรก็ได้ยาวๆยากๆตรงนี้
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=Narongrit
+PORT=3000
+(หมายเหตุ: DB_PASSWORD ถ้าไม่ได้ตั้งรหัส MySQL ไว้ ให้เว้นว่างหลังเครื่องหมาย =)
+
+▶️ 4. วิธีการรันเซิร์ฟเวอร์ (Start Server)
+เราจะใช้ PM2 (Process Manager) เพื่อให้ Server ทำงานเบื้องหลังตลอดเวลา และจัดการง่าย
+
+ขั้นตอนที่ 1: ติดตั้ง PM2 (ทำครั้งแรกครั้งเดียว)
+Bash
+npm install -g pm2
+ขั้นตอนที่ 2: สั่งรันระบบ
+พิมพ์คำสั่งนี้เพื่อเริ่มรันทั้ง Backend และ Frontend พร้อมกัน:
+
+รัน Backend (API Server):
+
+Bash
+pm2 start server.js --name "memehub-api"
+รัน Frontend (Web UI):
+
+Bash
+pm2 start "npm run dev" --name "memehub-web"
+เช็คสถานะ: พิมพ์คำสั่ง pm2 list (ต้องขึ้นสถานะ online สีเขียวทั้งคู่)
+
+🎉 เสร็จสิ้น! เข้าใช้งานเว็บได้ที่: http://localhost:5173 (หรือ IP เครื่องเซิร์ฟเวอร์)
+
+🛑 5. วิธีการปิดเซิร์ฟเวอร์ (Shutdown)
+เมื่อต้องการปิดระบบ หรือเลิกใช้งาน ต้องใช้คำสั่งนี้เพื่อให้แน่ใจว่า Process ถูกปิดสนิทและคืนค่า Port:
+
+Bash
+pm2 kill
+(คำสั่งนี้จะปิดทุกอย่างที่ PM2 รันอยู่ และเคลียร์ RAM ทันที)
