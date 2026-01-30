@@ -13,7 +13,6 @@ import Joi from "joi";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 
-// Configuration for Paths and Env
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const envPath = path.join(__dirname, ".env");
@@ -36,7 +35,6 @@ if (!SECRET) {
 
 if (!fs.existsSync("uploads")) fs.mkdirSync("uploads");
 
-// Middleware
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(compression());
 app.use(cors());
@@ -68,7 +66,6 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-// Middleware Auth
 const auth = (req, res, next) => {
   const token = req.headers["authorization"]?.split(" ")[1];
   if (!token) return res.status(401).json({ error: "Unauthorized" });
@@ -91,6 +88,16 @@ const optionalAuth = (req, res, next) => {
   }
   next();
 };
+
+// แก้ไข Joi: ไม่ล็อค .valid(...) แล้ว ยอมรับ string ทั่วไป (เพื่อให้เพิ่มหมวดใหม่ได้)
+const uploadSchema = Joi.object({
+  title: Joi.string().min(1).max(100).required(),
+  category: Joi.string().max(50).default("General"), // แก้ตรงนี้
+  description: Joi.string().allow("").optional(),
+  image: Joi.string()
+    .required()
+    .pattern(/^data:image\/(png|jpeg|jpg|gif|webp);base64,/),
+});
 
 // --- Routes ---
 
@@ -137,7 +144,46 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
-// 🔥 GET MEMES (Filter Category Logic)
+// API Categories Management (เพิ่มใหม่)
+app.get("/api/categories", async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      "SELECT name FROM categories ORDER BY name ASC",
+    );
+    // ส่งกลับเป็น Array ของชื่อ ['Anime', 'Funny', ...]
+    res.json(rows.map((row) => row.name));
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch categories" });
+  }
+});
+
+app.post("/api/categories", auth, async (req, res) => {
+  if (req.user.role !== "admin")
+    return res.status(403).json({ error: "Admin only" });
+  const { name } = req.body;
+  if (!name) return res.status(400).json({ error: "Name required" });
+  try {
+    await pool.query("INSERT INTO categories (name) VALUES (?)", [name]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(400).json({ error: "Category likely exists" });
+  }
+});
+
+app.delete("/api/categories/:name", auth, async (req, res) => {
+  if (req.user.role !== "admin")
+    return res.status(403).json({ error: "Admin only" });
+  try {
+    await pool.query("DELETE FROM categories WHERE name = ?", [
+      req.params.name,
+    ]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Delete failed" });
+  }
+});
+
+// GET MEMES
 app.get("/api/memes", optionalAuth, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -147,7 +193,6 @@ app.get("/api/memes", optionalAuth, async (req, res) => {
     const offset = (page - 1) * limit;
     const userId = req.user ? req.user.id : 0;
 
-    // Debug Log: เช็คว่า Frontend ส่งค่ากรองมาถูกไหม
     console.log(`[GET /memes] Category: ${category}, Search: ${search}`);
 
     let query = `
@@ -168,7 +213,6 @@ app.get("/api/memes", optionalAuth, async (req, res) => {
       params.push(`%${search}%`, `%${search}%`);
     }
 
-    // Logic กรอง Category
     if (category && category !== "All") {
       conditions.push(`m.category = ?`);
       params.push(category);
@@ -218,12 +262,11 @@ app.post("/api/memes", auth, async (req, res) => {
   }
 });
 
-// 🔥 PUT: แก้ไขหมวดหมู่ (Edit Category)
 app.put("/api/memes/:id", auth, async (req, res) => {
   const { category } = req.body;
   console.log(
     `[PUT /memes/${req.params.id}] New Category: ${category}, User: ${req.user.id}`,
-  ); // Debug Log
+  );
 
   try {
     const [meme] = await pool.query(
@@ -244,7 +287,6 @@ app.put("/api/memes/:id", auth, async (req, res) => {
       category,
       req.params.id,
     ]);
-    console.log("Update Success");
     res.json({ success: true });
   } catch (err) {
     console.error("Update Error:", err);

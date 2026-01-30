@@ -28,7 +28,7 @@ const TrashIcon = () => (
     strokeLinejoin="round"
   >
     <polyline points="3 6 5 6 21 6"></polyline>
-    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2-2v2"></path>
   </svg>
 );
 const DownloadIcon = () => (
@@ -62,19 +62,25 @@ const EditIcon = () => (
     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
   </svg>
 );
-
-const CATEGORIES = [
-  "Funny",
-  "Relatable",
-  "Dark Humor",
-  "Anime",
-  "Work Life",
-  "Other",
-  "General",
-];
+const SettingsIcon = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="3"></circle>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+  </svg>
+);
 
 export default function Home({ user, onLogout }) {
   const [memes, setMemes] = useState([]);
+  const [categories, setCategories] = useState([]); // 🔥 Load from DB
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -84,16 +90,20 @@ export default function Home({ user, onLogout }) {
   const [description, setDescription] = useState("");
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
-  const [category, setCategory] = useState("Funny");
+  const [category, setCategory] = useState("");
 
   // Search & Filter State
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterCategory, setFilterCategory] = useState("All"); // 🔥 New Filter State
+  const [filterCategory, setFilterCategory] = useState("All");
 
   // View & Edit State
   const [selectedMeme, setSelectedMeme] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editCategory, setEditCategory] = useState("");
+
+  // Admin Category Management
+  const [showCatManager, setShowCatManager] = useState(false);
+  const [newCatName, setNewCatName] = useState("");
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -119,6 +129,7 @@ export default function Home({ user, onLogout }) {
   const API = "/api";
 
   useEffect(() => {
+    fetchCategories();
     loadMemes(1, searchTerm, filterCategory, true);
     if (darkMode) document.body.classList.add("dark-mode");
     else document.body.classList.remove("dark-mode");
@@ -136,7 +147,17 @@ export default function Home({ user, onLogout }) {
     });
   };
 
-  // 🔥 Update loadMemes to include category
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch(`${API}/categories`);
+      const data = await res.json();
+      setCategories(data);
+      if (data.length > 0 && !category) setCategory(data[0]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const loadMemes = async (pageNum, search, cat, isNewSearch) => {
     try {
       setLoading(true);
@@ -165,7 +186,6 @@ export default function Home({ user, onLogout }) {
     loadMemes(1, searchTerm, filterCategory, true);
   };
 
-  // 🔥 Trigger search when category changes
   const handleCategoryFilterChange = (e) => {
     const newCat = e.target.value;
     setFilterCategory(newCat);
@@ -221,6 +241,45 @@ export default function Home({ user, onLogout }) {
       }
     };
     reader.readAsDataURL(file);
+  };
+
+  // 🔥 Admin: Add Category
+  const handleAddCategory = async (e) => {
+    e.preventDefault();
+    if (!newCatName) return;
+    try {
+      const res = await fetch(`${API}/categories`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ name: newCatName }),
+      });
+      if (res.ok) {
+        setNewCatName("");
+        fetchCategories(); // Reload list
+      } else {
+        alert("Category likely exists");
+      }
+    } catch (err) {
+      alert("Error adding category");
+    }
+  };
+
+  // 🔥 Admin: Delete Category
+  const handleDeleteCategory = async (catName) => {
+    if (!window.confirm(`Delete category "${catName}"?`)) return;
+    try {
+      const res = await fetch(`${API}/categories/${catName}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      if (res.ok) fetchCategories();
+      else alert("Failed to delete");
+    } catch (err) {
+      alert("Error deleting");
+    }
   };
 
   const handleLike = async (memeId) => {
@@ -339,7 +398,6 @@ export default function Home({ user, onLogout }) {
               MemeHub
             </h1>
 
-            {/* 🔥 Search Bar + Category Dropdown */}
             <div className="search-container">
               <form className="search-bar" onSubmit={handleSearch}>
                 <input
@@ -354,13 +412,23 @@ export default function Home({ user, onLogout }) {
                 value={filterCategory}
                 onChange={handleCategoryFilterChange}
               >
-                <option value="All">All</option>
-                {CATEGORIES.map((cat) => (
+                <option value="All">All Categories</option>
+                {categories.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat}
                   </option>
                 ))}
               </select>
+              {/* ปุ่ม Admin Manage Categories */}
+              {user?.role === "admin" && (
+                <button
+                  className="settings-btn"
+                  onClick={() => setShowCatManager(true)}
+                  title="Manage Categories"
+                >
+                  <SettingsIcon />
+                </button>
+              )}
             </div>
           </div>
           <div className="navbar-menu">
@@ -431,6 +499,7 @@ export default function Home({ user, onLogout }) {
         )}
       </div>
 
+      {/* Upload Modal */}
       {showUploadModal && (
         <div
           className="modal-overlay"
@@ -466,7 +535,8 @@ export default function Home({ user, onLogout }) {
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                   >
-                    {CATEGORIES.map((cat) => (
+                    {categories.length === 0 && <option>General</option>}
+                    {categories.map((cat) => (
                       <option key={cat} value={cat}>
                         {cat}
                       </option>
@@ -506,6 +576,70 @@ export default function Home({ user, onLogout }) {
         </div>
       )}
 
+      {/* 🔥 Admin Category Manager Modal */}
+      {showCatManager && (
+        <div className="modal-overlay" onClick={() => setShowCatManager(false)}>
+          <div
+            className="modal-content upload-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header-section">
+              <h2>Manage Categories</h2>
+              <button
+                className="modal-close-btn"
+                onClick={() => setShowCatManager(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="modal-scroll-area">
+              <form
+                onSubmit={handleAddCategory}
+                style={{ display: "flex", gap: "8px", marginBottom: "20px" }}
+              >
+                <input
+                  type="text"
+                  value={newCatName}
+                  onChange={(e) => setNewCatName(e.target.value)}
+                  placeholder="New category name..."
+                  style={{ flex: 1, padding: "8px" }}
+                />
+                <button
+                  type="submit"
+                  className="save-tiny-btn"
+                  style={{ fontSize: "1rem" }}
+                >
+                  Add
+                </button>
+              </form>
+              <div className="cat-list">
+                {categories.map((cat) => (
+                  <div
+                    key={cat}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      padding: "8px",
+                      borderBottom: "1px solid var(--border)",
+                    }}
+                  >
+                    <span>{cat}</span>
+                    <button
+                      onClick={() => handleDeleteCategory(cat)}
+                      className="cancel-tiny-btn"
+                      style={{ color: "var(--danger)" }}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View/Edit Modal */}
       {selectedMeme && (
         <div className="modal-overlay" onClick={() => setSelectedMeme(null)}>
           <div
@@ -541,7 +675,7 @@ export default function Home({ user, onLogout }) {
                             value={editCategory}
                             onChange={(e) => setEditCategory(e.target.value)}
                           >
-                            {CATEGORIES.map((cat) => (
+                            {categories.map((cat) => (
                               <option key={cat} value={cat}>
                                 {cat}
                               </option>
