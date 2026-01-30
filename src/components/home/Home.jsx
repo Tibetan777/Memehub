@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import "./Home.css";
 
-// SVG Icons
+// --- Icons ---
 const HeartIcon = ({ filled }) => (
   <svg
     width="20"
@@ -16,7 +16,6 @@ const HeartIcon = ({ filled }) => (
     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
   </svg>
 );
-
 const TrashIcon = () => (
   <svg
     width="18"
@@ -32,7 +31,6 @@ const TrashIcon = () => (
     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
   </svg>
 );
-
 const DownloadIcon = () => (
   <svg
     width="18"
@@ -49,12 +47,38 @@ const DownloadIcon = () => (
     <line x1="12" y1="15" x2="12" y2="3"></line>
   </svg>
 );
+const EditIcon = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+  </svg>
+);
+
+const CATEGORIES = [
+  "Funny",
+  "Relatable",
+  "Dark Humor",
+  "Anime",
+  "Work Life",
+  "Other",
+  "General",
+];
 
 export default function Home({ user, onLogout }) {
   const [memes, setMemes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
 
+  // Upload State
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -62,15 +86,21 @@ export default function Home({ user, onLogout }) {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [category, setCategory] = useState("Funny");
 
+  // Search & Filter State
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterCategory, setFilterCategory] = useState("All"); // 🔥 New Filter State
+
+  // View & Edit State
   const [selectedMeme, setSelectedMeme] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editCategory, setEditCategory] = useState("");
+
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [darkMode, setDarkMode] = useState(
     () => localStorage.getItem("theme") === "dark",
   );
 
-  // Infinite Scroll Observer
   const observer = useRef();
   const lastMemeElementRef = useCallback(
     (node) => {
@@ -89,18 +119,13 @@ export default function Home({ user, onLogout }) {
   const API = "/api";
 
   useEffect(() => {
-    // Load initial data
-    loadMemes(1, searchTerm, true);
-
+    loadMemes(1, searchTerm, filterCategory, true);
     if (darkMode) document.body.classList.add("dark-mode");
     else document.body.classList.remove("dark-mode");
   }, [darkMode]);
 
-  // Effect for Infinite Scroll (Load when page changes)
   useEffect(() => {
-    if (page > 1) {
-      loadMemes(page, searchTerm, false);
-    }
+    if (page > 1) loadMemes(page, searchTerm, filterCategory, false);
   }, [page]);
 
   const toggleTheme = () => {
@@ -111,24 +136,20 @@ export default function Home({ user, onLogout }) {
     });
   };
 
-  const loadMemes = async (pageNum, search, isNewSearch) => {
+  // 🔥 Update loadMemes to include category
+  const loadMemes = async (pageNum, search, cat, isNewSearch) => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-      const res = await fetch(
-        `${API}/memes?page=${pageNum}&limit=12&search=${encodeURIComponent(search)}&t=${Date.now()}`,
-        { headers },
-      );
+      const query = `page=${pageNum}&limit=12&search=${encodeURIComponent(search)}&category=${cat}&t=${Date.now()}`;
+      const res = await fetch(`${API}/memes?${query}`, { headers });
       const responseData = await res.json();
       const newMemes = responseData.data || [];
 
-      if (isNewSearch) {
-        setMemes(newMemes);
-      } else {
-        setMemes((prev) => [...prev, ...newMemes]);
-      }
+      if (isNewSearch) setMemes(newMemes);
+      else setMemes((prev) => [...prev, ...newMemes]);
 
       setHasMore(newMemes.length >= 12);
     } catch (err) {
@@ -141,7 +162,15 @@ export default function Home({ user, onLogout }) {
   const handleSearch = (e) => {
     e.preventDefault();
     setPage(1);
-    loadMemes(1, searchTerm, true);
+    loadMemes(1, searchTerm, filterCategory, true);
+  };
+
+  // 🔥 Trigger search when category changes
+  const handleCategoryFilterChange = (e) => {
+    const newCat = e.target.value;
+    setFilterCategory(newCat);
+    setPage(1);
+    loadMemes(1, searchTerm, newCat, true);
   };
 
   const handleFileChange = (e) => {
@@ -180,7 +209,8 @@ export default function Home({ user, onLogout }) {
           setShowUploadModal(false);
           setPage(1);
           setSearchTerm("");
-          loadMemes(1, "", true); // Reload fresh
+          setFilterCategory("All");
+          loadMemes(1, "", "All", true);
         } else {
           alert("Upload failed");
         }
@@ -196,14 +226,12 @@ export default function Home({ user, onLogout }) {
   const handleLike = async (memeId) => {
     const token = localStorage.getItem("token");
     if (!token) return alert("Please login to like.");
-
     try {
       const res = await fetch(`${API}/memes/${memeId}/like`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-
       if (res.ok) {
         setMemes((prev) =>
           prev.map((m) => {
@@ -212,7 +240,6 @@ export default function Home({ user, onLogout }) {
               const newLikes = isLikedNow
                 ? m.likes + 1
                 : Math.max(0, m.likes - 1);
-
               if (selectedMeme && selectedMeme.id === memeId) {
                 setSelectedMeme((curr) => ({
                   ...curr,
@@ -229,6 +256,33 @@ export default function Home({ user, onLogout }) {
     } catch (err) {}
   };
 
+  const handleUpdateCategory = async () => {
+    if (!selectedMeme) return;
+    try {
+      const res = await fetch(`${API}/memes/${selectedMeme.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ category: editCategory }),
+      });
+      if (res.ok) {
+        setSelectedMeme((prev) => ({ ...prev, category: editCategory }));
+        setMemes((prev) =>
+          prev.map((m) =>
+            m.id === selectedMeme.id ? { ...m, category: editCategory } : m,
+          ),
+        );
+        setIsEditing(false);
+      } else {
+        alert("Update failed");
+      }
+    } catch (err) {
+      alert("Error updating");
+    }
+  };
+
   const handleDeleteMeme = async (memeId) => {
     if (!window.confirm("Delete this post permanently?")) return;
     try {
@@ -238,7 +292,7 @@ export default function Home({ user, onLogout }) {
       });
       if (res.ok) {
         setPage(1);
-        loadMemes(1, searchTerm, true);
+        loadMemes(1, searchTerm, filterCategory, true);
         setSelectedMeme(null);
       } else {
         alert("Cannot delete: Unauthorized");
@@ -263,10 +317,10 @@ export default function Home({ user, onLogout }) {
     }
   };
 
-  // Hide broken images
-  const handleImageError = (e) => {
-    e.target.style.display = "none"; // Hide the img element
-    // Optional: e.target.src = '/placeholder.png';
+  const openMeme = (meme) => {
+    setSelectedMeme(meme);
+    setIsEditing(false);
+    setEditCategory(meme.category);
   };
 
   return (
@@ -278,19 +332,36 @@ export default function Home({ user, onLogout }) {
               className="navbar-logo"
               onClick={() => {
                 setSearchTerm("");
-                loadMemes(1, "", true);
+                setFilterCategory("All");
+                loadMemes(1, "", "All", true);
               }}
             >
               MemeHub
             </h1>
-            <form className="search-bar" onSubmit={handleSearch}>
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </form>
+
+            {/* 🔥 Search Bar + Category Dropdown */}
+            <div className="search-container">
+              <form className="search-bar" onSubmit={handleSearch}>
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </form>
+              <select
+                className="nav-cat-select"
+                value={filterCategory}
+                onChange={handleCategoryFilterChange}
+              >
+                <option value="All">All</option>
+                {CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           <div className="navbar-menu">
             <button className="theme-btn" onClick={toggleTheme}>
@@ -312,68 +383,45 @@ export default function Home({ user, onLogout }) {
 
       <div className="home-content">
         <div className="memes-header">
-          <h2>{searchTerm ? `Results: "${searchTerm}"` : "Latest Memes"}</h2>
+          <h2>
+            {filterCategory === "All"
+              ? "Latest Memes"
+              : `${filterCategory} Memes`}{" "}
+            {searchTerm && `for "${searchTerm}"`}
+          </h2>
         </div>
         <div className="memes-grid">
           {memes.map((meme, index) => {
-            if (memes.length === index + 1) {
-              return (
-                <div
-                  ref={lastMemeElementRef}
-                  key={meme.id}
-                  className="meme-card"
-                  onClick={() => setSelectedMeme(meme)}
-                >
-                  <div className="meme-image-wrapper">
-                    <img
-                      src={`/api/memes/${meme.id}/image`}
-                      alt={meme.title}
-                      className="meme-image"
-                      loading="lazy"
-                      onError={handleImageError}
-                    />
+            const isLast = memes.length === index + 1;
+            return (
+              <div
+                ref={isLast ? lastMemeElementRef : null}
+                key={meme.id}
+                className="meme-card"
+                onClick={() => openMeme(meme)}
+              >
+                <div className="meme-image-wrapper">
+                  <img
+                    src={`/api/memes/${meme.id}/image`}
+                    alt={meme.title}
+                    className="meme-image"
+                    loading="lazy"
+                    onError={(e) => (e.target.style.display = "none")}
+                  />
+                </div>
+                <div className="meme-info">
+                  <h3 className="meme-title">{meme.title}</h3>
+                  <div className="meme-meta-row">
+                    <span className="meme-uploader">by {meme.uploader}</span>
+                    <span className="meme-cat-badge">{meme.category}</span>
                   </div>
-                  <div className="meme-info">
-                    <h3>{meme.title}</h3>
-                    <div className="meme-footer">
-                      <div className="meme-stats">
-                        <HeartIcon filled={meme.isLiked} />{" "}
-                        <span>{meme.likes}</span>
-                      </div>
-                      <span className="meme-cat">{meme.category}</span>
-                    </div>
+                  <div className="meme-stats-row">
+                    <HeartIcon filled={meme.isLiked} />{" "}
+                    <span>{meme.likes}</span>
                   </div>
                 </div>
-              );
-            } else {
-              return (
-                <div
-                  key={meme.id}
-                  className="meme-card"
-                  onClick={() => setSelectedMeme(meme)}
-                >
-                  <div className="meme-image-wrapper">
-                    <img
-                      src={`/api/memes/${meme.id}/image`}
-                      alt={meme.title}
-                      className="meme-image"
-                      loading="lazy"
-                      onError={handleImageError}
-                    />
-                  </div>
-                  <div className="meme-info">
-                    <h3>{meme.title}</h3>
-                    <div className="meme-footer">
-                      <div className="meme-stats">
-                        <HeartIcon filled={meme.isLiked} />{" "}
-                        <span>{meme.likes}</span>
-                      </div>
-                      <span className="meme-cat">{meme.category}</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            }
+              </div>
+            );
           })}
         </div>
 
@@ -401,7 +449,6 @@ export default function Home({ user, onLogout }) {
                 ×
               </button>
             </div>
-
             <div className="modal-scroll-area">
               <form onSubmit={handleUpload}>
                 <div className="form-group">
@@ -419,12 +466,11 @@ export default function Home({ user, onLogout }) {
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                   >
-                    <option>Funny</option>
-                    <option>Relatable</option>
-                    <option>Dark Humor</option>
-                    <option>Anime</option>
-                    <option>Work Life</option>
-                    <option>Other</option>
+                    {CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div className="upload-area">
@@ -477,16 +523,62 @@ export default function Home({ user, onLogout }) {
                 <img
                   src={`/api/memes/${selectedMeme.id}/image`}
                   alt={selectedMeme.title}
-                  onError={handleImageError}
+                  onError={(e) => (e.target.style.display = "none")}
                 />
               </div>
               <div className="modal-details">
                 <div className="modal-top">
-                  <div className="modal-header">
-                    <h2>{selectedMeme.title}</h2>
-                    <span className="modal-cat">{selectedMeme.category}</span>
+                  <h2 className="modal-title">{selectedMeme.title}</h2>
+                  <div className="modal-meta-block">
+                    <div className="modal-uploader">
+                      Posted by <strong>{selectedMeme.uploader}</strong>
+                    </div>
+                    <div className="modal-category-row">
+                      {isEditing ? (
+                        <div className="edit-cat-wrapper">
+                          <select
+                            className="edit-cat-select"
+                            value={editCategory}
+                            onChange={(e) => setEditCategory(e.target.value)}
+                          >
+                            {CATEGORIES.map((cat) => (
+                              <option key={cat} value={cat}>
+                                {cat}
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            className="save-tiny-btn"
+                            onClick={handleUpdateCategory}
+                          >
+                            Save
+                          </button>
+                          <button
+                            className="cancel-tiny-btn"
+                            onClick={() => setIsEditing(false)}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="modal-cat-badge">
+                            {selectedMeme.category}
+                          </span>
+                          {(user?.role === "admin" ||
+                            user?.id === selectedMeme.created_by) && (
+                            <button
+                              className="edit-icon-btn"
+                              onClick={() => setIsEditing(true)}
+                              title="Edit Category"
+                            >
+                              <EditIcon />
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <div className="meta">Posted by {selectedMeme.uploader}</div>
                 </div>
 
                 <div className="modal-actions-area">

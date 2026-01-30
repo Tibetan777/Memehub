@@ -30,8 +30,9 @@ body.dark-mode {
   min-height: 100vh;
   background-color: var(--bg-main);
   color: var(--text-primary);
-  padding-top: 70px;
-  font-family: "Inter", system-ui, sans-serif;
+  padding-top: 130px;
+  /* เพิ่มพื้นที่ด้านบนเพื่อให้ Navbar มือถือไม่บัง */
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
 /* Navbar */
@@ -39,28 +40,51 @@ body.dark-mode {
   position: fixed;
   top: 0;
   width: 100%;
-  height: 64px;
   background: var(--bg-card);
   border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
   z-index: 100;
+  padding: 10px 0;
 }
+
 .navbar-content {
   width: 95%;
   max-width: 1280px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  /* ยอมให้ตกบรรทัดในมือถือ */
+  gap: 10px;
 }
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+}
+
 .navbar-logo {
   font-size: 1.5rem;
   font-weight: 800;
   cursor: pointer;
-  background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+  white-space: nowrap;
+  background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+/* 🔥 Search & Category Container */
+.search-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  max-width: 500px;
+}
+
 .search-bar {
   background: var(--bg-main);
   border: 1px solid var(--border);
@@ -68,9 +92,10 @@ body.dark-mode {
   border-radius: 99px;
   display: flex;
   align-items: center;
-  width: 320px;
+  width: 100%;
   height: 40px;
 }
+
 .search-bar input {
   background: transparent;
   border: none;
@@ -78,51 +103,77 @@ body.dark-mode {
   color: var(--text-primary);
   width: 100%;
 }
+
+.nav-cat-select {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg-main);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  outline: none;
+}
+
 .navbar-menu {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
+/* Buttons */
 button {
   cursor: pointer;
   font-weight: 600;
   transition: all 0.2s;
   border: none;
 }
+
 .upload-btn-nav {
   background: var(--accent);
   color: white;
   padding: 8px 20px;
   border-radius: 99px;
+  white-space: nowrap;
 }
+
 .upload-btn-nav:hover {
   background: var(--accent-hover);
   transform: translateY(-1px);
 }
+
 .logout-btn {
   background: transparent;
   color: var(--text-secondary);
 }
+
 .logout-btn:hover {
   color: var(--text-primary);
 }
+
 .theme-btn {
   background: transparent;
   font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* Grid Layout */
 .memes-header h2 {
   color: var(--text-primary);
   margin-bottom: 24px;
 }
+
 .memes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
   padding-bottom: 40px;
 }
 
+/* Card Styling */
 .meme-card {
   background: var(--bg-card);
   border-radius: 12px;
@@ -130,57 +181,82 @@ button {
   border: 1px solid var(--border);
   cursor: pointer;
   transition: transform 0.2s;
+  display: flex;
+  flex-direction: column;
 }
+
 .meme-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
+
 .meme-image-wrapper {
-  height: 280px;
+  height: 250px;
   background: #000;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
 }
+
 .meme-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
+
 .meme-info {
-  padding: 16px;
+  padding: 12px 14px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
-.meme-info h3 {
-  margin: 0 0 12px 0;
-  font-size: 1rem;
+
+.meme-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(--text-primary);
 }
-.meme-footer {
+
+.meme-meta-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-.meme-stats {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  font-size: 0.85rem;
   color: var(--text-secondary);
-  font-size: 0.9rem;
-}
-.meme-cat {
-  background: var(--bg-main);
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  border: 1px solid var(--border);
 }
 
-/* Modal General */
+.meme-uploader {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60%;
+}
+
+.meme-cat-badge {
+  background: var(--bg-main);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  font-size: 0.75rem;
+}
+
+.meme-stats-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+/* Modal Styles */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -191,6 +267,7 @@ button {
   z-index: 200;
   backdrop-filter: blur(4px);
 }
+
 .modal-content {
   background: var(--modal-bg);
   border-radius: 16px;
@@ -203,6 +280,7 @@ button {
   display: flex;
   flex-direction: column;
 }
+
 .modal-close {
   position: absolute;
   top: 16px;
@@ -214,12 +292,12 @@ button {
   line-height: 1;
 }
 
-/* View Modal */
 .view-modal .modal-body {
   display: flex;
-  height: 90vh;
+  height: 85vh;
   overflow: hidden;
 }
+
 .modal-img-container {
   flex: 1.8;
   background: #020617;
@@ -228,11 +306,13 @@ button {
   justify-content: center;
   overflow: hidden;
 }
+
 .modal-img-container img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
 }
+
 .modal-details {
   flex: 1;
   padding: 32px;
@@ -243,129 +323,96 @@ button {
   overflow-y: auto;
 }
 
-.modal-header h2 {
-  margin: 0;
-  font-size: 1.5rem;
+.modal-title {
+  margin: 0 0 12px 0;
+  font-size: 1.6rem;
   line-height: 1.3;
   color: var(--text-primary);
+  font-weight: 800;
 }
-.modal-cat {
-  background: var(--bg-main);
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 0.8rem;
+
+.modal-meta-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
   color: var(--text-secondary);
-  white-space: nowrap;
-  margin-left: 10px;
+}
+
+.modal-category-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-cat-badge {
+  background: var(--bg-main);
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.edit-icon-btn {
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+}
+
+.edit-icon-btn:hover {
+  background: var(--bg-main);
+  color: var(--accent);
+}
+
+.edit-cat-wrapper {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.edit-cat-select {
+  padding: 4px;
+  border-radius: 4px;
+  background: var(--bg-input);
+  color: var(--text-primary);
   border: 1px solid var(--border);
 }
-.meta {
-  color: var(--text-secondary);
-  margin-bottom: 24px;
-  font-size: 0.95rem;
+
+.save-tiny-btn {
+  background: var(--accent);
+  color: white;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  border-radius: 4px;
 }
+
+.cancel-tiny-btn {
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 4px 8px;
+  font-size: 0.8rem;
+}
+
 .modal-actions-area {
   margin-top: auto;
 }
+
 .stats-large {
   font-size: 1.2rem;
   font-weight: 700;
   margin-bottom: 16px;
   color: var(--text-primary);
 }
+
 .action-row {
   display: flex;
   gap: 12px;
 }
 
-/* Upload Modal (Fixed Mobile Layout) */
-.upload-modal {
-  max-width: 500px;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  max-height: 85vh;
-}
-.modal-header-section {
-  padding: 20px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.modal-header-section h2 {
-  margin: 0;
-  font-size: 1.2rem;
-  color: var(--text-primary);
-}
-.modal-close-btn {
-  background: none;
-  border: none;
-  font-size: 2rem;
-  line-height: 1;
-  cursor: pointer;
-  color: var(--text-secondary);
-}
-.modal-scroll-area {
-  padding: 20px;
-  overflow-y: auto;
-  flex: 1;
-}
-
-.form-group {
-  margin-bottom: 16px;
-}
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-.form-group input,
-.form-group select {
-  width: 100%;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--bg-input);
-  color: var(--text-primary);
-  box-sizing: border-box;
-  font-size: 1rem;
-}
-.upload-area {
-  border: 2px dashed var(--border);
-  background: var(--bg-input);
-  min-height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  cursor: pointer;
-  margin-bottom: 24px;
-  color: var(--text-secondary);
-}
-.submit-btn {
-  width: 100%;
-  padding: 12px;
-  background: var(--accent);
-  color: white;
-  border-radius: 8px;
-  font-size: 1rem;
-  margin-top: 10px;
-}
-
-.loading-spinner {
-  text-align: center;
-  padding: 20px;
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-.end-text {
-  text-align: center;
-  padding: 20px;
-  color: var(--text-secondary);
-}
-
+/* Buttons */
 .action-btn {
   flex: 1;
   display: flex;
@@ -379,55 +426,189 @@ button {
   background: var(--bg-main);
   color: var(--text-primary);
 }
+
 .action-btn:hover {
   background: var(--border);
 }
+
 .action-btn.like.active {
   background: #fee2e2;
   color: #ef4444;
   border-color: #fda4af;
 }
+
 body.dark-mode .action-btn.like.active {
   background: #4c0519;
   border-color: #881337;
 }
+
 .action-btn.download {
   background: var(--text-primary);
   color: var(--bg-card);
   border: none;
 }
+
 .action-btn.delete {
   color: var(--danger);
   border-color: var(--danger);
   background: transparent;
 }
+
 .action-btn.delete:hover {
   background: var(--danger-bg);
 }
 
+/* Upload Modal Mobile Fix */
+.upload-modal {
+  max-width: 500px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+}
+
+.modal-header-section {
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header-section h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.modal-scroll-area {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+
+.upload-area {
+  border: 2px dashed var(--border);
+  background: var(--bg-input);
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 24px;
+  color: var(--text-secondary);
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--accent);
+  color: white;
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-top: 10px;
+}
+
+/* 🔥 Mobile Responsive Fixes (สำคัญมาก) */
 @media (max-width: 768px) {
-  .search-bar {
-    display: none;
+  .home-container {
+    padding-top: 140px;
   }
+
+  /* ขยับเนื้อหาลงมาหลบ Navbar */
+
+  .navbar-content {
+    flex-direction: column;
+    /* เรียงแนวตั้ง */
+    align-items: stretch;
+  }
+
+  .nav-left {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    order: 2;
+    /* ย้าย Search ลงมาล่าง */
+  }
+
+  .navbar-menu {
+    justify-content: space-between;
+    width: 100%;
+    order: 1;
+    /* ย้ายปุ่ม Login/Menu ขึ้นบน */
+    margin-bottom: 10px;
+  }
+
+  /* แสดง Search และ Filter ในมือถือแล้ว! */
+  .search-container {
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    gap: 8px;
+  }
+
+  .navbar-logo {
+    text-align: center;
+    display: none;
+    /* ซ่อน Logo ในหน้าค้นหาเพื่อประหยัดที่ หรือจะโชว์ก็ได้ */
+  }
+
   .view-modal .modal-body {
     flex-direction: column;
     height: auto;
     max-height: 90vh;
     overflow-y: auto;
   }
+
   .modal-img-container {
     min-height: 300px;
     flex: none;
   }
+
   .modal-details {
     border-left: none;
     padding: 20px;
-    overflow: visible;
   }
 
-  /* Mobile Fix for Upload Modal */
   .upload-modal {
     width: 90%;
     max-height: 80vh;
+  }
+
+  .user-name {
+    display: none;
   }
 }

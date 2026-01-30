@@ -10,21 +10,39 @@ import fs from "fs";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import Joi from "joi";
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+
+// Configuration for Paths and Env
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const envPath = path.join(__dirname, ".env");
+
+console.log("Loading .env from:", envPath);
+
+const result = dotenv.config({ path: envPath });
+if (result.error) {
+  console.log("Error loading .env file:", result.error);
+}
 
 const app = express();
-const PORT = 3000;
-const SECRET = "meme-hub-secret-2024";
+const PORT = process.env.PORT || 3000;
+const SECRET = process.env.JWT_SECRET;
+
+if (!SECRET) {
+  console.error("FATAL ERROR: JWT_SECRET is not defined in .env");
+  process.exit(1);
+}
 
 if (!fs.existsSync("uploads")) fs.mkdirSync("uploads");
 
+// Middleware
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(compression());
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
+app.set("trust proxy", 1);
 
-// เพิ่ม Cache Control ให้รูปภาพ (Optimization)
-// บอก Browser และ Cloudflare ว่าให้เก็บรูปไว้ 1 ปี (1y) ไม่ต้องมาขอใหม่บ่อยๆ
-// ช่วยลดภาระ Server เวลาคนเข้าเยอะๆ
 app.use(
   "/uploads",
   express.static("uploads", {
@@ -41,16 +59,16 @@ const apiLimiter = rateLimit({
 app.use("/api/", apiLimiter);
 
 const pool = mysql.createPool({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "Narongrit",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 50,
   queueLimit: 0,
 });
 
-// Middleware
+// Middleware Auth
 const auth = (req, res, next) => {
   const token = req.headers["authorization"]?.split(" ")[1];
   if (!token) return res.status(401).json({ error: "Unauthorized" });
@@ -62,7 +80,6 @@ const auth = (req, res, next) => {
   }
 };
 
-// Middleware สำหรับหน้า Feed
 const optionalAuth = (req, res, next) => {
   const token = req.headers["authorization"]?.split(" ")[1];
   if (token) {
@@ -74,25 +91,6 @@ const optionalAuth = (req, res, next) => {
   }
   next();
 };
-
-const uploadSchema = Joi.object({
-  title: Joi.string().min(1).max(100).required(),
-  category: Joi.string()
-    .valid(
-      "Funny",
-      "Relatable",
-      "Dark Humor",
-      "Anime",
-      "Other",
-      "Work Life",
-      "General",
-    )
-    .default("General"),
-  description: Joi.string().allow("").optional(),
-  image: Joi.string()
-    .required()
-    .pattern(/^data:image\/(png|jpeg|jpg|gif|webp);base64,/),
-});
 
 // --- Routes ---
 
@@ -139,17 +137,18 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
-// GET MEMES (High Performance & Accurate Like Check)
+// 🔥 GET MEMES (Filter Category Logic)
 app.get("/api/memes", optionalAuth, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    const limit = parseInt(req.query.limit) || 12;
     const search = req.query.search || "";
+    const category = req.query.category || "All";
     const offset = (page - 1) * limit;
-
     const userId = req.user ? req.user.id : 0;
 
-    console.log(`[GET /memes] Request by UserID: ${userId}`);
+    // Debug Log: เช็คว่า Frontend ส่งค่ากรองมาถูกไหม
+    console.log(`[GET /memes] Category: ${category}, Search: ${search}`);
 
     let query = `
       SELECT
@@ -160,11 +159,23 @@ app.get("/api/memes", optionalAuth, async (req, res) => {
       LEFT JOIN members mem ON m.created_by = mem.id_mem
       LEFT JOIN meme_likes ml ON m.id = ml.meme_id AND ml.user_id = ?
     `;
+
     const params = [userId];
+    const conditions = [];
 
     if (search) {
-      query += ` WHERE m.title LIKE ? OR m.category LIKE ? `;
+      conditions.push(`(m.title LIKE ? OR m.category LIKE ?)`);
       params.push(`%${search}%`, `%${search}%`);
+    }
+
+    // Logic กรอง Category
+    if (category && category !== "All") {
+      conditions.push(`m.category = ?`);
+      params.push(category);
+    }
+
+    if (conditions.length > 0) {
+      query += ` WHERE ` + conditions.join(" AND ");
     }
 
     query += ` ORDER BY m.created_at DESC LIMIT ? OFFSET ? `;
@@ -204,6 +215,40 @@ app.post("/api/memes", auth, async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: "Upload failed" });
+  }
+});
+
+// 🔥 PUT: แก้ไขหมวดหมู่ (Edit Category)
+app.put("/api/memes/:id", auth, async (req, res) => {
+  const { category } = req.body;
+  console.log(
+    `[PUT /memes/${req.params.id}] New Category: ${category}, User: ${req.user.id}`,
+  ); // Debug Log
+
+  try {
+    const [meme] = await pool.query(
+      "SELECT created_by FROM memes WHERE id = ?",
+      [req.params.id],
+    );
+    if (!meme[0]) return res.status(404).json({ error: "Not found" });
+
+    if (
+      req.user.role !== "admin" &&
+      Number(req.user.id) !== Number(meme[0].created_by)
+    ) {
+      console.log("Forbidden: User is not owner");
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    await pool.query("UPDATE memes SET category = ? WHERE id = ?", [
+      category,
+      req.params.id,
+    ]);
+    console.log("Update Success");
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Update Error:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -258,7 +303,6 @@ app.delete("/api/memes/:id", auth, async (req, res) => {
       return res.status(403).json({ error: "Forbidden" });
     }
 
-    // ลบไฟล์รูปจริงออกจากโฟลเดอร์ uploads (Clean up)
     const filePath = path.join("uploads", meme[0].image);
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
 
